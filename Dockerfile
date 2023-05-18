@@ -81,6 +81,7 @@ RUN : \
     && cd repositories \
     && git clone https://github.com/agrocylo/bitsandbytes-rocm \
     && cd bitsandbytes-rocm \
+    && git reset --hard $GIT_BITSANDBYTES_HASH \
     && make hip -j \
     && source $WEBUI_DIR/.venv/bin/activate \
     && pip uninstall -y bitsandbytes \

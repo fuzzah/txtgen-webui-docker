@@ -1,6 +1,4 @@
 # txtgen-webui-docker
-text-generation-webui in Docker for Linux & AMD GPUs<br>
-
 So I needed to run [text-generation-webui](https://github.com/oobabooga/text-generation-webui) specifically in Docker on Arch Linux host with AMD Radeon RX 6700 XT, but failed to find complete solution on how to do it.<br>
 This repo contains the Dockerfile with my findings.<br>
 
@@ -10,7 +8,7 @@ Prerequisites:
 - Docker (`pacman -S docker docker-buildx ; sudo usermod -aG docker $USER`, restart current session by logging out and then logging in)
 - AMD GPU (I have tested this only on RX 6700 XT)
 - Not sure, but probably some video drivers installed on your host system (`pacman -S xf86-video-amdgpu`)
-- A TON of disk space, like 40GB only for this image (without any models!). If you want to play with different models I suggest having ~150GB for this image + models, and the absolute minimum I think is somewhere at 60GB for image + one model.
+- A TON of disk space, like 40GB only for this image (without any models!). If you want to play with different models I suggest having ~150GB for this image + models, and the absolute minimum I think is somewhere at 50GB for image + one model.
 
 Run the following commands:
 ```shell
@@ -52,10 +50,10 @@ To gracefully stop the UI hit Ctrl+C in the container where the UI runs.<br>
 # Credits / References / Sources / See also
 These were the pieces of information I used to write the Dockerfile. If you struggle with using this repo, try checking the links for possible solutions and updates.<br>
 Links:
-- [the Web UI itself with general setup instructions](https://github.com/oobabooga/text-generation-webui)
+- [the Web UI itself with general setup instructions](https://github.com/oobabooga/text-generation-webui) (has instructions and even some files for Docker, but only for CPU and Nvidia)
 - [an amazing article with setup instructions for Artix/Arch Linux & AMD GPUs](https://rentry.org/eq3hg) (no docker though)
-- [bitsandbytes library with rocm support with build instructions for AMD GPUs](https://github.com/agrocylo/bitsandbytes-rocm/blob/8b1b1b429fc513fb1743d2efb81ff2ddfebdbc14/compile_from_source.md#rocm)
-- [a great comment with setup instructions for Arch Linux](https://github.com/oobabooga/text-generation-webui/issues/879#issuecomment-1502144828) from [Nazushvel](https://github.com/Nazushvel)
-- [the recommended way to run containers from the rocm/pytorch image](https://hub.docker.com/r/rocm/pytorch)
+- [bitsandbytes library with rocm support with build instructions for AMD GPUs](https://github.com/agrocylo/bitsandbytes-rocm/blob/8b1b1b429fc513fb1743d2efb81ff2ddfebdbc14/compile_from_source.md#rocm) (but it actually has to be installed the last)
+- [a great comment with setup instructions for Arch Linux](https://github.com/oobabooga/text-generation-webui/issues/879#issuecomment-1502144828) from [Nazushvel](https://github.com/Nazushvel) (but I had to change the order)
+- [the recommended way to run containers from the rocm/pytorch image](https://hub.docker.com/r/rocm/pytorch) (but I don't rely on rocm/pytorch image and instead build my own to save ~10 GB of disk space)
 
 Mashed together in a working manner by [fuzzah](https://github.com/fuzzah).
