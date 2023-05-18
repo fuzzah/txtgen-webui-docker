@@ -33,7 +33,7 @@ ENV HCC_AMDGPU_TARGET=gfx1030
 
 ARG WEBUI_DIR=/webui
 ENV WEBUI_DIR="$WEBUI_DIR"
-ARG GIT_WEBBUI_HASH=b667ffa51d0e58508b0be74c1abea99d340a9ab8
+ARG GIT_WEBUI_HASH=b667ffa51d0e58508b0be74c1abea99d340a9ab8
 RUN : \
     && git clone https://github.com/oobabooga/text-generation-webui $WEBUI_DIR \
     && cd $WEBUI_DIR \
