@@ -54,7 +54,7 @@ These were the pieces of information I used to write the Dockerfile. If you stru
 Links:
 - [the Web UI itself with general setup instructions](https://github.com/oobabooga/text-generation-webui)
 - [an amazing article with setup instructions for Artix/Arch Linux & AMD GPUs](https://rentry.org/eq3hg) (no docker though)
-- [bitsandbytes library with rocm support with building instructions for AMD GPUs](https://github.com/agrocylo/bitsandbytes-rocm/blob/8b1b1b429fc513fb1743d2efb81ff2ddfebdbc14/compile_from_source.md#rocm)
+- [bitsandbytes library with rocm support with build instructions for AMD GPUs](https://github.com/agrocylo/bitsandbytes-rocm/blob/8b1b1b429fc513fb1743d2efb81ff2ddfebdbc14/compile_from_source.md#rocm)
 - [a great comment with setup instructions for Arch Linux](https://github.com/oobabooga/text-generation-webui/issues/879#issuecomment-1502144828) from [Nazushvel](https://github.com/Nazushvel)
 - [the recommended way to run containers from the rocm/pytorch image](https://hub.docker.com/r/rocm/pytorch)
 
