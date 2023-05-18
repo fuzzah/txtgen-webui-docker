@@ -37,13 +37,12 @@ docker container attach txtgen-webui
 ```
 
 ## Use the Web UI
-If you run shell instead of default CMD instructions, then you'll need to run these commands in the container to start the Web UI:
+If you pass some command (e.g. bash) instead of default CMD instructions when issuing `docker run`, then you need to run these commands in the container to start the Web UI:
 ```shell
-. .venv/bin/activate
-export HSA_OVERRIDE_GFX_VERSION=10.3.0 HCC_AMDGPU_TARGET=gfx1030 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4
-python server.py --chat --wbits 4 --groupsize 128 --api --listen-port 7860
+source .venv/bin/activate
+python server.py --chat --wbits 4 --groupsize 128 --api --listen-port $PORT
 ```
-Visit this url to use the UI: http://127.0.0.1:7860.<br>
+In your browser visit this url to use the UI: http://127.0.0.1:7860.<br>
 The default port number is 7860, but you can change it by passing the `PORT` env variable when starting the container, e.g. `docker run -e PORT=8080 ...`<br>
 
 Get some quantized models from https://huggingface.co. You can fetch them either via the Web UI or using the download_model.py script.<br>
