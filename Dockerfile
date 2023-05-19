@@ -4,6 +4,7 @@ RUN : \
     && pacman --noconfirm -Syu --needed \
         vim nano tmux bash-completion file which \
         python python-pip git \
+        base-devel gperftools \
     && pacman --noconfirm -Scc \
     && :
 
@@ -15,6 +16,10 @@ RUN : \
     && git config --global advice.detachedHead false \
     && :
 
+
+
+FROM base AS rocm
+# This stage adds ~22 GB of size
 RUN : \
     && pacman --noconfirm -S rocm-hip-sdk \
     && pacman --noconfirm -Scc \
@@ -22,14 +27,14 @@ RUN : \
 
 ENV PATH=/opt/rocm/bin:$PATH
 
-# TODO: move this above rocm
-RUN : \
-    && pacman --noconfirm -S gperftools \
-    && pacman --noconfirm -Scc \
-    && :
+
+
+FROM rocm AS webui
 
 ENV HSA_OVERRIDE_GFX_VERSION=10.3.0
 ENV HCC_AMDGPU_TARGET=gfx1030
+
+ENV PIP_NO_CACHE_DIR=1
 
 ARG WEBUI_DIR=/webui
 ENV WEBUI_DIR="$WEBUI_DIR"
@@ -40,25 +45,18 @@ RUN : \
     && git reset --hard $GIT_WEBUI_HASH \
     && python -m venv .venv \
     && source .venv/bin/activate \
-    && pip install --no-cache-dir -U pip \
-    && pip install --no-cache-dir build wheel \
+    && pip install -U pip \
+    && pip install build wheel \
     && mkdir repositories \
     && :
 
 WORKDIR $WEBUI_DIR
 
 ARG PYTORCH_ROCM_VERSION=5.4.2
-# NOTE: may want to drop this pip cache as well
 RUN : \
     && source .venv/bin/activate \
     && pip install --index-url https://download.pytorch.org/whl/rocm${PYTORCH_ROCM_VERSION} \
         torch torchvision torchaudio \
-    && :
-
-# TODO: move this to the very beginning
-RUN : \
-    && pacman --noconfirm -S base-devel \
-    && pacman --noconfirm -Scc \
     && :
 
 ARG GIT_GPTQ_FOR_LLAMA_HASH=f12e3e2f913e88395e9209547d0955eb2f0edd84
@@ -88,6 +86,10 @@ RUN : \
     && python setup.py install \
     && :
 
+
+
+FROM webui AS run
+
 # Learned my lessons with stable diffusion
 #   so will preload this for every torch app
 ENV LD_PRELOAD=/usr/lib/libtcmalloc_minimal.so
@@ -95,5 +97,5 @@ ENV LD_PRELOAD=/usr/lib/libtcmalloc_minimal.so
 ENV PORT=7860
 CMD : \
     && source .venv/bin/activate \
-    && python server.py --chat --wbits 4 --groupsize 128 --api --listen-port $PORT \
+    && python server.py --chat --api --verbose --wbits 4 --groupsize 128 --listen-port $PORT \
     && :
