@@ -6,9 +6,9 @@ This repo contains the [Dockerfile](Dockerfile) with my findings.<br>
 Prerequisites:
 - Arch Linux, but other Linux-based systems are probably fine too
 - Docker (`pacman -S docker docker-buildx ; sudo usermod -aG docker $USER`, restart current session by logging out and then logging in)
-- AMD GPU (I have tested this only on RX 6700 XT)
-- Not sure, but probably some video drivers installed on your host system (`pacman -S xf86-video-amdgpu`)
-- A TON of disk space, like 40GB only for this image (without any models!). If you want to play with different models I suggest having ~150GB for this image + models, and the absolute minimum I think is somewhere at 50GB for image + one model.
+- an AMD GPU (I have tested this only on RX 6700 XT)
+- not sure, but probably some video drivers installed on your host system (`pacman -S xf86-video-amdgpu`)
+- a TON of disk space, like 40GB only for this image (without any models!). If you want to play with different models I suggest having ~150GB for this image + models, and the absolute minimum I think is somewhere at 50GB for image + one model.
 
 Run the following commands:
 ```shell
@@ -18,8 +18,15 @@ docker build -t txtgen-webui .
 ```
 The last command will probably take a lot of time.
 
+Overridable build args (use `--build-arg NAME=value` for each):
+- `GIT_WEBUI_HASH`: commit hash or tag for [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui)
+- `GIT_GPTQ_FOR_LLAMA_HASH`: commit hash or tag for [WapaMario63/GPTQ-for-LLaMa-ROCm](https://github.com/WapaMario63/GPTQ-for-LLaMa-ROCm)
+- `GIT_BITSANDBYTES_HASH`: commit hash or tag for [agrocylo/bitsandbytes-rocm](https://github.com/agrocylo/bitsandbytes-rocm)
+- `PYTORCH_ROCM_VERSION`: PyTorch version to use. Used as part of URL for pip index to use, so the actual URL must exist, e.g. the value 5.4.2 is OK, because `https://download.pytorch.org/whl/rocm5.4.2` is an existing URL.
+- `HSA_OVERRIDE_GFX_VERSION`, `HCC_AMDGPU_TARGET`: you may want to change these to match some AMD GPU other than RX 6700 XT. For specific values for your GPU please refer to the Internet.
+
 # Run
-You need to start the container and then run the Web UI.<br>
+You need to start the container and then run the Web UI script.<br>
 
 ## Start or restart the container
 To start the container use the following command:
@@ -35,12 +42,13 @@ docker container attach txtgen-webui
 ```
 
 ## Use the Web UI
-If you pass some command (e.g. bash) instead of default CMD instructions when issuing `docker run`, then you need to run these commands in the container to start the Web UI:
+If you run the container without a custom command or entrypoint, then the UI script will start automatically.<br>
+However, If you pass some command (e.g. bash) instead of the default CMD instructions, then you need to run these commands in the container to start the Web UI:
 ```shell
-source .venv/bin/activate
+source "$VENV_PATH/bin/activate"
 python server.py --chat --api --verbose --wbits 4 --groupsize 128 --listen-port $PORT
 ```
-In your browser visit this url to use the UI: http://127.0.0.1:7860.<br>
+In your browser visit this url to access the UI: http://127.0.0.1:7860.<br>
 The default port number is 7860, but you can change it by passing the `PORT` env variable when starting the container, e.g. `docker run -e PORT=8080 ...`<br>
 
 Get some quantized models from https://huggingface.co. You can fetch them either via the Web UI or using the download_model.py script.<br>
