@@ -90,13 +90,19 @@ ARG WEBUI_PATH=/webui
 ENV WEBUI_PATH=$WEBUI_PATH
 WORKDIR $WEBUI_PATH
 
-ARG GIT_WEBUI_HASH=b667ffa51d0e58508b0be74c1abea99d340a9ab8
+ARG GIT_WEBUI_HASH=8936160e54d0884494fe0735dee14304c4b4fbbb
 RUN : \
     && git clone https://github.com/oobabooga/text-generation-webui "$WEBUI_PATH" \
     && cd "$WEBUI_PATH" \
     && git reset --hard $GIT_WEBUI_HASH \
     && ln -s "$REPOS_PATH" "$WEBUI_PATH/repositories" \
     && source "$VENV_PATH/bin/activate" \
+    && AGPTQ_URL=$(grep -E requirements.txt -e 'AutoGPTQ/releases.*?Linux' | cut -d ';' -f 1) \
+    && AGPTQ_VER=$(echo "$AGPTQ_URL" | sed -r 's|^.*?/auto_gptq-(.*?\+cu[^-]*).*$|\1|g') \
+    && curl -L -o "auto_gptq-${AGPTQ_VER}-py3-none-any.whl" "$AGPTQ_URL" \
+    && pip install ./auto_gptq*.whl \
+    && rm -f ./auto_gptq*.whl \
+    && sed -i requirements.txt -e '/auto_gptq.*\.whl/d' \
     && pip install -r requirements.txt \
     && pip uninstall -y bitsandbytes \
     && cd "$REPOS_PATH/$BITSANDBYTES_DIR_NAME" \
