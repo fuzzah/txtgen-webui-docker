@@ -90,20 +90,46 @@ ARG WEBUI_PATH=/webui
 ENV WEBUI_PATH=$WEBUI_PATH
 WORKDIR $WEBUI_PATH
 
-ARG GIT_WEBUI_HASH=8936160e54d0884494fe0735dee14304c4b4fbbb
+# FROM webui AS sdhjsgjksg
+ARG GIT_WEBUI_HASH=300219b0816a86eafedda0ae285e30390a28b629
 RUN : \
     && git clone https://github.com/oobabooga/text-generation-webui "$WEBUI_PATH" \
     && cd "$WEBUI_PATH" \
     && git reset --hard $GIT_WEBUI_HASH \
     && ln -s "$REPOS_PATH" "$WEBUI_PATH/repositories" \
     && source "$VENV_PATH/bin/activate" \
-    && AGPTQ_URL=$(grep -E requirements.txt -e 'AutoGPTQ/releases.*?Linux' | cut -d ';' -f 1) \
-    && AGPTQ_VER=$(echo "$AGPTQ_URL" | sed -r 's|^.*?/auto_gptq-(.*?\+cu[^-]*).*$|\1|g') \
+    && : UTTERLY BUTCHER THE REQUIREMENTS.TXT FILE \
+    && : AutoGPTQ: change cuda to rocm and cp310 to any \
+    && AGPTQ_URL=$(grep -E requirements.txt -e 'AutoGPTQ/releases.*?Linux' | cut -d';' -f1 | sed 's|cu[0-9]*|rocm5.4.2|g') \
+    && AGPTQ_VER=$(echo "$AGPTQ_URL" | sed -r 's|^.*?/auto_gptq-(.*?\+rocm[^-]*).*$|\1|g') \
     && curl -L -o "auto_gptq-${AGPTQ_VER}-py3-none-any.whl" "$AGPTQ_URL" \
-    && pip install ./auto_gptq*.whl \
+    && pip install ./auto_gptq-*.whl \
     && rm -f ./auto_gptq*.whl \
     && sed -i requirements.txt -e '/auto_gptq.*\.whl/d' \
+    && : exllama: change cuda to rocm and cp310 to any \
+    && EXLLAMA_URL=$(grep -E requirements.txt -e 'exllama/releases.*?Linux' | cut -d';' -f1 | sed 's|cu[0-9]*|rocm5.4.2|g') \
+    && EXLLAMA_VER=$(echo "$EXLLAMA_URL" | sed -r 's|^.*?/exllama-(.*?\+rocm[^-]*).*$|\1|g') \
+    && curl -L -o "exllama-${EXLLAMA_VER}-py3-none-any.whl" "$EXLLAMA_URL" \
+    && pip install ./exllama-*.whl \
+    && rm -f ./exllama-*.whl \
+    && sed -i requirements.txt -e '/exllama.*\.whl/d' \
+    && : llama_cpp_python_cuda: change cp310 to any \
+    && LLAMA_CPP_PYTHON_CUDA_URL=$(grep -E requirements.txt -e 'llama-cpp-python-cuBLAS-wheels/releases.*?Linux' | cut -d';' -f1) \
+    && LLAMA_CPP_PYTHON_CUDA_VER=$(echo "$LLAMA_CPP_PYTHON_CUDA_URL" | sed -r 's|^.*?/llama_cpp_python_cuda-(.*?\+cu[^-]*).*$|\1|g') \
+    && curl -L -o "llama_cpp_python_cuda-${LLAMA_CPP_PYTHON_CUDA_VER}-py3-none-any.whl" "$LLAMA_CPP_PYTHON_CUDA_URL" \
+    && pip install ./llama_cpp_python_cuda-*.whl \
+    && rm -f ./llama_cpp_python_cuda-*.whl \
+    && sed -i requirements.txt -e '/llama_cpp_python_cuda.*\.whl/d' \
+    && : gptq_for_llama: change cuda to rocm and cp310 to any \
+    && GPTQ4LLAMA_URL=$(grep -E requirements.txt -e 'GPTQ-for-LLaMa-CUDA/releases.*?Linux' | cut -d';' -f1 | sed 's|cu[0-9]*|rocm5.4.2|g') \
+    && GPTQ4LLAMA_VER=$(echo "$GPTQ4LLAMA_URL" | sed -r 's|^.*?/gptq_for_llama-(.*?\+rocm[^-]*).*$|\1|g') \
+    && curl -L -o "gptq_for_llama-${GPTQ4LLAMA_VER}-py3-none-any.whl" "$GPTQ4LLAMA_URL" \
+    && pip install ./gptq_for_llama-*.whl \
+    && rm -f ./gptq_for_llama-*.whl \
+    && sed -i requirements.txt -e '/gptq_for_llama.*\.whl/d' \
+    && : PROCEED WITH NORMAL INSTALL \
     && pip install -r requirements.txt \
+    && : finish bitsandbytes installation \
     && pip uninstall -y bitsandbytes \
     && cd "$REPOS_PATH/$BITSANDBYTES_DIR_NAME" \
     && python setup.py install \
